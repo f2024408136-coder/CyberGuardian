@@ -41,9 +41,33 @@ def signup():
 
     return render_template('signup.html')
 
-
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    if request.method == 'POST':
+
+        email = request.form['email']
+        password = request.form['password']
+
+        conn = sqlite3.connect('database/users.db')
+
+        cur = conn.cursor()
+
+        cur.execute(
+            "SELECT * FROM users WHERE email=? AND password=?",
+            (email, password)
+        )
+
+        user = cur.fetchone()
+
+        conn.close()
+
+        if user:
+            return "Login Successful"
+
+        else:
+            return "Invalid Email or Password"
+
     return render_template('login.html')
 
 
