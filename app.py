@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
-
+import re
 app = Flask(__name__)
 
 @app.route('/')
@@ -15,6 +15,28 @@ def signup():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
+        score = 0
+
+        if len(password) >= 8:
+            score += 1
+
+        if re.search("[A-Z]", password):
+            score += 1
+
+        if re.search("[0-9]", password):
+            score += 1
+
+        if re.search("[@#$%^&*!]", password):
+            score += 1
+
+        if score <= 1:
+            strength = "Weak Password"
+
+        elif score <= 3:
+            strength = "Medium Password"
+
+        else:
+            strength = "Strong Password"
 
         conn = sqlite3.connect('database/users.db')
 
@@ -37,7 +59,7 @@ def signup():
         conn.commit()
         conn.close()
 
-        return "Signup Successful"
+        return strength
 
     return render_template('signup.html')
 
