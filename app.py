@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request
 import sqlite3
 import re
+
 app = Flask(__name__)
 
 @app.route('/')
 def home():
     return "CyberGuardian Running Successfully"
 
+
+# SIGNUP
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
 
@@ -15,6 +18,8 @@ def signup():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
+
+        # PASSWORD STRENGTH CHECKER
         score = 0
 
         if len(password) >= 8:
@@ -38,6 +43,7 @@ def signup():
         else:
             strength = "Strong Password"
 
+        # DATABASE
         conn = sqlite3.connect('database/users.db')
 
         cur = conn.cursor()
@@ -63,6 +69,8 @@ def signup():
 
     return render_template('signup.html')
 
+
+# LOGIN
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -91,6 +99,26 @@ def login():
             return "Invalid Email or Password"
 
     return render_template('login.html')
+
+
+# FILE SCANNER
+@app.route('/scanner', methods=['GET', 'POST'])
+def scanner():
+
+    if request.method == 'POST':
+
+        filename = request.form['filename']
+
+        suspicious_extensions = ['.exe', '.bat', '.vbs', '.cmd']
+
+        for ext in suspicious_extensions:
+
+            if filename.endswith(ext):
+                return "Warning: Suspicious File Detected"
+
+        return "File Appears Safe"
+
+    return render_template('scanner.html')
 
 
 if __name__ == '__main__':
