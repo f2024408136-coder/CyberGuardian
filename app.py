@@ -63,7 +63,7 @@ def login():
         conn.close()
 
         if user:
-            return "Login Successful"
+            return render_template('dashboard.html')
 
         else:
             return "Invalid Email or Password"
