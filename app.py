@@ -4,6 +4,8 @@ import re
 
 app = Flask(__name__)
 
+
+# HOME
 @app.route('/')
 def home():
     return "CyberGuardian Running Successfully"
@@ -93,7 +95,13 @@ def login():
         conn.close()
 
         if user:
-            return render_template('dashboard.html')
+
+            score = 80
+
+            return render_template(
+                'dashboard.html',
+                score=score
+            )
 
         else:
             return "Invalid Email or Password"
