@@ -2,10 +2,24 @@
 <html>
 
 <head>
+
     <title>Dashboard - CyberGuardian</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
+
+    <div class="navbar">
+
+        <a href="/login">Login</a>
+
+        <a href="/scanner">Scanner</a>
+
+        <a href="/signup">Signup</a>
+
+    </div>
 
     <h1>CyberGuardian Dashboard</h1>
 
@@ -22,8 +36,11 @@
     <br><br>
 
     <a href="/scanner">
-    <button>Open File Scanner</button>
+
+        <button>Open File Scanner</button>
+
     </a>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </body>
+
 </html>
