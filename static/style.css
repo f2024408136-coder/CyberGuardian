@@ -53,3 +53,24 @@ button:hover{
 .navbar a:hover{
     color: white;
 }
+.alert-box{
+    width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 12px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.warning{
+    background-color: #ffcc00;
+    color: black;
+}
+
+.danger{
+    background-color: #ff4d4d;
+}
+
+.moderate{
+    background-color: #3399ff;
+}
