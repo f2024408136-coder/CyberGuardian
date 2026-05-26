@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import sqlite3
 import re
+import os
 
 app = Flask(__name__)
 
@@ -115,7 +116,13 @@ def scanner():
 
     if request.method == 'POST':
 
-        filename = request.form['filename']
+        file = request.files['file']
+
+        filename = file.filename
+
+        filepath = os.path.join('scans', filename)
+
+        file.save(filepath)
 
         suspicious_extensions = ['.exe', '.bat', '.vbs', '.cmd']
 
@@ -127,7 +134,8 @@ def scanner():
 
                 return render_template(
                     'scanner.html',
-                    result=result
+                    result=result,
+                    filename=filename
                 )
 
         result = "File Appears Safe"
@@ -136,10 +144,9 @@ def scanner():
             'scanner.html',
             result=result,
             filename=filename
- )
+        )
 
     return render_template('scanner.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
