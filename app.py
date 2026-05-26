@@ -122,9 +122,21 @@ def scanner():
         for ext in suspicious_extensions:
 
             if filename.endswith(ext):
-                return "Warning: Suspicious File Detected"
 
-        return "File Appears Safe"
+                result = "Warning: Suspicious File Detected"
+
+                return render_template(
+                    'scanner.html',
+                    result=result
+                )
+
+        result = "File Appears Safe"
+
+        return render_template(
+            'scanner.html',
+            result=result,
+            filename=filename
+ )
 
     return render_template('scanner.html')
 

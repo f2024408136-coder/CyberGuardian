@@ -2,21 +2,31 @@
 <html>
 
 <head>
+
     <title>File Scanner - CyberGuardian</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
 
-    <h1>Suspicious File Checker</h1>
+    <h1>CyberGuardian File Scanner</h1>
 
     <form method="POST">
 
-        <label>Enter File Name:</label><br>
-        <input type="text" name="filename"><br><br>
+        <label>Enter File Name:</label><br><br>
 
+        <input type="text" name="filename" value="{{ filename }}"><br><br>
         <button type="submit">Scan File</button>
 
     </form>
+    {% if result %}
+
+    <h2>{{ result }}</h2>
+
+    {% endif %}
 
 </body>
+
 </html>
