@@ -15,24 +15,48 @@
 
     <form method="POST" enctype="multipart/form-data">
 
-        <label>Enter File Name:</label><br><br>
+        <label>Enter File Name:</label>
+        <br><br>
 
         <input type="file" name="file">
+
         {% if filename %}
 
-        <p>Selected File: {{ filename }}</p>
+            <p>Selected File: {{ filename }}</p>
 
         {% endif %}
-        
+
         <button type="submit">Scan File</button>
 
     </form>
+
     {% if result %}
 
-    <h2>{{ result }}</h2>
+        <h2>{{ result }}</h2>
 
     {% endif %}
 
+    <br><br>
+
+   <h2>Recent Scan History</h2>
+
+<table class="history-table">
+
+    <tr>
+        <th>File Name</th>
+        <th>Result</th>
+    </tr>
+
+    {% for item in history %}
+
+    <tr>
+        <td>{{ item[0] }}</td>
+        <td>{{ item[1] }}</td>
+    </tr>
+
+    {% endfor %}
+
+</table>
 </body>
 
 </html>

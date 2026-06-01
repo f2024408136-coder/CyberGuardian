@@ -104,8 +104,7 @@ def login():
             return render_template(
                 'dashboard.html',
                 score=score,
-               suspicious_count=suspicious_count     
-
+                suspicious_count=suspicious_count     
             )
 
         else:
@@ -125,10 +124,39 @@ def dashboard():
 # FILE SCANNER
 @app.route('/scanner', methods=['GET', 'POST'])
 def scanner():
+
     global suspicious_count
+
+    conn = sqlite3.connect('database/users.db')
+
+    cur = conn.cursor()
+
+    cur.execute('''
+    CREATE TABLE IF NOT EXISTS scan_history(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filename TEXT,
+        result TEXT
+    )
+    ''')
+
+    cur.execute(
+        "SELECT filename, result FROM scan_history ORDER BY id DESC"
+    )
+
+    history = cur.fetchall()
+
+    conn.close()
+
     if request.method == 'POST':
 
         file = request.files['file']
+        if file.filename == '':
+
+            return render_template(
+        'scanner.html',
+        result='Please Select a File First',
+        history=history
+    )
 
         filename = file.filename
 
@@ -146,21 +174,49 @@ def scanner():
 
                 result = "Warning: Suspicious File Detected"
 
+                conn = sqlite3.connect('database/users.db')
+
+                cur = conn.cursor()
+
+                cur.execute(
+                    "INSERT INTO scan_history(filename,result) VALUES(?,?)",
+                    (filename, result)
+                )
+
+                conn.commit()
+                conn.close()
+
                 return render_template(
                     'scanner.html',
                     result=result,
-                    filename=filename
+                    filename=filename,
+                    history=history
                 )
 
         result = "File Appears Safe"
 
+        conn = sqlite3.connect('database/users.db')
+
+        cur = conn.cursor()
+
+        cur.execute(
+            "INSERT INTO scan_history(filename,result) VALUES(?,?)",
+            (filename, result)
+        )
+
+        conn.commit()
+        conn.close()
+
         return render_template(
             'scanner.html',
             result=result,
-            filename=filename
+            filename=filename,
+            history=history
         )
 
-    return render_template('scanner.html')
-
+    return render_template(
+        'scanner.html',
+        history=history
+    )
 if __name__ == '__main__':
     app.run(debug=True)
