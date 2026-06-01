@@ -3,6 +3,8 @@ import sqlite3
 import re
 import os
 
+suspicious_count = 0
+
 app = Flask(__name__)
 
 
@@ -101,7 +103,9 @@ def login():
 
             return render_template(
                 'dashboard.html',
-                score=score
+                score=score,
+               suspicious_count=suspicious_count     
+
             )
 
         else:
@@ -109,11 +113,19 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/dashboard')
+def dashboard():
+
+    return render_template(
+        'dashboard.html',
+        suspicious_count=suspicious_count
+    )
+
 
 # FILE SCANNER
 @app.route('/scanner', methods=['GET', 'POST'])
 def scanner():
-
+    global suspicious_count
     if request.method == 'POST':
 
         file = request.files['file']
@@ -129,6 +141,8 @@ def scanner():
         for ext in suspicious_extensions:
 
             if filename.endswith(ext):
+
+                suspicious_count += 1
 
                 result = "Warning: Suspicious File Detected"
 
