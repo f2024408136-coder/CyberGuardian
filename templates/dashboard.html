@@ -26,29 +26,35 @@
     <h3>Security Status</h3>
 
     <div class="alert-box warning">
-
-    2 Weak Passwords Detected
-
+        2 Weak Passwords Detected
     </div>
 
     <div class="alert-box danger">
-
-    {{ suspicious_count }} Suspicious Files Found
-
+        {{ suspicious_count }} Suspicious Files Found
     </div>
 
     <div class="alert-box moderate">
-
-    Browser Security: Moderate
-
+        Browser Security: Moderate
     </div>
 
     <br><br>
 
+    <h2>Latest Security Alerts</h2>
+
+    <div class="alert-box warning">
+        {{ threat1 }}
+    </div>
+
+    <div class="alert-box danger">
+        {{ threat2 }}
+    </div>
+
+    <div class="alert-box moderate">
+        {{ threat3 }}
+    </div>
+
     <a href="/scanner">
-
         <button>Open File Scanner</button>
-
     </a>
 
 </body>

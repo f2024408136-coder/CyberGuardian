@@ -2,6 +2,8 @@ from flask import Flask, render_template, request
 import sqlite3
 import re
 import os
+import requests
+from bs4 import BeautifulSoup
 
 suspicious_count = 0
 
@@ -111,15 +113,36 @@ def login():
             return "Invalid Email or Password"
 
     return render_template('login.html')
-
 @app.route('/dashboard')
 def dashboard():
 
+    try:
+
+        url = "https://thehackernews.com"
+
+        response = requests.get(url)
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        headlines = soup.find_all("h2")
+
+        threat1 = headlines[0].text.strip()
+        threat2 = headlines[1].text.strip()
+        threat3 = headlines[2].text.strip()
+
+    except:
+
+        threat1 = "Unable to Fetch Security Alerts"
+        threat2 = "Check Internet Connection"
+        threat3 = "Try Again Later"
+
     return render_template(
         'dashboard.html',
-        suspicious_count=suspicious_count
+        suspicious_count=suspicious_count,
+        threat1=threat1,
+        threat2=threat2,
+        threat3=threat3
     )
-
 
 # FILE SCANNER
 @app.route('/scanner', methods=['GET', 'POST'])
