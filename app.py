@@ -136,12 +136,27 @@ def dashboard():
         threat2 = "Check Internet Connection"
         threat3 = "Try Again Later"
 
+    # DYNAMIC SECURITY SCORE
+
+    if suspicious_count == 0:
+        security_score = 100
+
+    elif suspicious_count == 1:
+        security_score = 80
+
+    elif suspicious_count == 2:
+        security_score = 60
+
+    else:
+        security_score = 40
+
     return render_template(
         'dashboard.html',
         suspicious_count=suspicious_count,
         threat1=threat1,
         threat2=threat2,
-        threat3=threat3
+        threat3=threat3,
+        security_score=security_score
     )
 
 # FILE SCANNER
