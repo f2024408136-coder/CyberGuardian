@@ -94,6 +94,21 @@
             background: transparent !important;
             color: #00d4ff !important;
         }
+
+        .message-box {
+            width: 80%;
+            max-width: 400px;
+            margin: 15px auto;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .error-msg {
+            background-color: #e74c3c;
+            color: white;
+        }
     </style>
 </head>
 
@@ -101,7 +116,11 @@
 
     <h1>Create Account</h1>
 
-    <form method="POST">
+    {% if error %}
+        <div class="message-box error-msg">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/signup">
 
         <label>Name:</label><br>
         <input type="text" name="name" required><br><br>

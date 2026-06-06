@@ -25,17 +25,47 @@
 
     <h3>Security Status</h3>
 
-    <div class="alert-box warning">
-        2 Weak Passwords Detected
-    </div>
+    {% if weak_count == 0 %}
+        <div class="alert-box moderate">
+            No Weak Passwords Detected
+        </div>
+    {% elif weak_count == 1 %}
+        <div class="alert-box warning">
+            1 Weak Password Detected
+        </div>
+    {% else %}
+        <div class="alert-box danger">
+            {{ weak_count }} Weak Passwords Detected
+        </div>
+    {% endif %}
 
-    <div class="alert-box danger">
-        {{ suspicious_count }} Suspicious Files Found
-    </div>
+    {% if suspicious_count == 0 %}
+        <div class="alert-box moderate">
+            No Suspicious Files Found
+        </div>
+    {% elif suspicious_count <= 2 %}
+        <div class="alert-box warning">
+            {{ suspicious_count }} Suspicious Files Found
+        </div>
+    {% else %}
+        <div class="alert-box danger">
+            {{ suspicious_count }} Suspicious Files Found
+        </div>
+    {% endif %}
 
-    <div class="alert-box moderate">
-        Security Score: {{ security_score }}%
-    </div>
+    {% if security_score >= 80 %}
+        <div class="alert-box moderate">
+            Security Score: {{ security_score }}%
+        </div>
+    {% elif security_score >= 50 %}
+        <div class="alert-box warning">
+            Security Score: {{ security_score }}%
+        </div>
+    {% else %}
+        <div class="alert-box danger">
+            Security Score: {{ security_score }}%
+        </div>
+    {% endif %}
 
     <br><br>
 
