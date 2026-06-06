@@ -3,7 +3,7 @@
 
 <head>
 
-    <title>Dashboard - CyberGuardian</title>
+    <title>Defense Console — CyberGuardian</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
@@ -11,81 +11,155 @@
 
 <body>
 
+    <canvas id="matrix-canvas"></canvas>
+    <div class="global-scan"></div>
+    <div class="live-clock" id="live-clock">00/00/0000 | 00:00:00</div>
+
     <div class="navbar">
-
         <a href="/login">Login</a>
-
-        <a href="/scanner">Scanner</a>
-
         <a href="/signup">Signup</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/scanner">Scanner</a>
+    </div>
+
+    <div class="logo-section">
+        <h1>CyberGuardian</h1>
+        <p class="brand-tagline">// Threat Detection &amp; Security Dashboard //</p>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            System Online — Real-time Monitoring Active
+        </div>
+    </div>
+
+    <div class="boot-sequence">
+        <div class="boot-line"><span class="boot-time">[00:00:01]</span> <span class="boot-tag">[INIT]</span> Loading CyberGuardian Flask Application... <span class="boot-ok">[OK]</span></div>
+        <div class="boot-line"><span class="boot-time">[00:00:02]</span> <span class="boot-tag">[DB]</span> Connecting to SQLite database... <span class="boot-ok">[OK]</span></div>
+        <div class="boot-line"><span class="boot-time">[00:00:03]</span> <span class="boot-tag">[NET]</span> Fetching security alerts from thehackernews.com... <span class="boot-ok">[OK]</span></div>
+        <div class="boot-line"><span class="boot-time">[00:00:04]</span> <span class="boot-tag">[SCAN]</span> File scanner module initialized... <span class="boot-ok">[OK]</span></div>
+        <div class="boot-line"><span class="boot-time">[00:00:05]</span> <span class="boot-tag">[SYS]</span> All systems operational... <span class="boot-ok">[READY]</span></div>
+    </div>
+
+    <h2>Security Overview</h2>
+
+    <div class="dash-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">🛡️</div>
+            <div class="stat-value" data-counter="{{ security_score }}" data-suffix="%">{{ security_score }}%</div>
+            <div class="stat-label">Security Score</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🔐</div>
+            <div class="stat-value" data-counter="{{ weak_count }}">{{ weak_count }}</div>
+            <div class="stat-label">Weak Passwords</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-value" data-counter="{{ suspicious_count }}">{{ suspicious_count }}</div>
+            <div class="stat-label">Suspicious Files</div>
+        </div>
 
     </div>
 
-    <h1>CyberGuardian Dashboard</h1>
+    <div class="section-divider"></div>
 
-    <h3>Security Status</h3>
+    <h3>Threat Status Alerts</h3>
 
     {% if weak_count == 0 %}
         <div class="alert-box moderate">
-            No Weak Passwords Detected
+            ✓ No Weak Passwords Detected — Identity Vault Secure
         </div>
     {% elif weak_count == 1 %}
         <div class="alert-box warning">
-            1 Weak Password Detected
+            ⚠ 1 Weak Password Detected — Review Required
         </div>
     {% else %}
         <div class="alert-box danger">
-            {{ weak_count }} Weak Passwords Detected
+            ⛔ {{ weak_count }} Weak Passwords Detected — Critical Action Required
         </div>
     {% endif %}
 
     {% if suspicious_count == 0 %}
         <div class="alert-box moderate">
-            No Suspicious Files Found
+            ✓ No Suspicious Files Found — Network Perimeter Clean
         </div>
     {% elif suspicious_count <= 2 %}
         <div class="alert-box warning">
-            {{ suspicious_count }} Suspicious Files Found
+            ⚠ {{ suspicious_count }} Suspicious Files Found — Quarantine Recommended
         </div>
     {% else %}
         <div class="alert-box danger">
-            {{ suspicious_count }} Suspicious Files Found
+            ⛔ {{ suspicious_count }} Suspicious Files Found — Immediate Response Required
         </div>
     {% endif %}
 
     {% if security_score >= 80 %}
         <div class="alert-box moderate">
-            Security Score: {{ security_score }}%
+            ✓ Security Score: {{ security_score }}% — Excellent Defensive Posture
         </div>
     {% elif security_score >= 50 %}
         <div class="alert-box warning">
-            Security Score: {{ security_score }}%
+            ⚠ Security Score: {{ security_score }}% — Moderate Risk Exposure
         </div>
     {% else %}
         <div class="alert-box danger">
-            Security Score: {{ security_score }}%
+            ⛔ Security Score: {{ security_score }}% — Critical Risk Level
         </div>
     {% endif %}
 
-    <br><br>
+    <div class="section-divider"></div>
 
-    <h2>Latest Security Alerts</h2>
+    <h3>Threat Intelligence Feed</h3>
+    <p class="brand-tagline">// Live feed from global threat sources //</p>
 
     <div class="alert-box warning">
-        {{ threat1 }}
+        <strong>[ALERT-01]</strong> &nbsp; {{ threat1 }}
     </div>
 
     <div class="alert-box danger">
-        {{ threat2 }}
+        <strong>[ALERT-02]</strong> &nbsp; {{ threat2 }}
     </div>
 
     <div class="alert-box moderate">
-        {{ threat3 }}
+        <strong>[ALERT-03]</strong> &nbsp; {{ threat3 }}
     </div>
 
+    <div class="section-divider"></div>
+
     <a href="/scanner">
-        <button>Open File Scanner</button>
+        <button>⚡ Launch File Scanner</button>
     </a>
+
+    <br><br><br>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="blink">●</span>
+            <span class="label">Status:</span>
+            <span class="value">ARMED</span>
+        </div>
+        <div class="status-item">
+            <span class="label">CPU:</span>
+            <span class="value" id="status-cpu">22.4%</span>
+        </div>
+        <div class="status-item">
+            <span class="label">Memory:</span>
+            <span class="value" id="status-mem">45.7%</span>
+        </div>
+        <div class="status-item">
+            <span class="label">Network:</span>
+            <span class="value" id="status-net">128 KB/s</span>
+        </div>
+        <div class="status-item">
+            <span class="label">User:</span>
+            <span class="value">ANALYST-01</span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='cyber.js') }}"></script>
 
 </body>
 
