@@ -1,10 +1,39 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import re
 import os
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+
+
+def get_password_score(password):
+    score = 0
+    if len(password) >= 8:
+        score += 1
+    if re.search("[A-Z]", password):
+        score += 1
+    if re.search("[0-9]", password):
+        score += 1
+    if re.search("[@#$%^&*!]", password):
+        score += 1
+    return score
+
+
+def count_weak_passwords():
+    try:
+        conn = sqlite3.connect('database/users.db')
+        cur = conn.cursor()
+        cur.execute("SELECT password FROM users")
+        rows = cur.fetchall()
+        conn.close()
+        weak = 0
+        for row in rows:
+            if get_password_score(row[0]) <= 1:
+                weak += 1
+        return weak
+    except:
+        return 0
 
 suspicious_count = 0
 
@@ -28,28 +57,14 @@ def signup():
         password = request.form['password']
 
         # PASSWORD STRENGTH CHECKER
-        score = 0
-
-        if len(password) >= 8:
-            score += 1
-
-        if re.search("[A-Z]", password):
-            score += 1
-
-        if re.search("[0-9]", password):
-            score += 1
-
-        if re.search("[@#$%^&*!]", password):
-            score += 1
+        score = get_password_score(password)
 
         if score <= 1:
-            strength = "Weak Password"
-
+            strength = "Weak"
         elif score <= 3:
-            strength = "Medium Password"
-
+            strength = "Medium"
         else:
-            strength = "Strong Password"
+            strength = "Strong"
 
         # DATABASE
         conn = sqlite3.connect('database/users.db')
@@ -65,6 +80,14 @@ def signup():
         )
         ''')
 
+        # Check if email already exists
+        cur.execute("SELECT * FROM users WHERE email=?", (email,))
+        existing = cur.fetchone()
+
+        if existing:
+            conn.close()
+            return render_template('signup.html', error="Email already registered. Please login.")
+
         cur.execute(
             "INSERT INTO users(name,email,password) VALUES(?,?,?)",
             (name, email, password)
@@ -73,7 +96,10 @@ def signup():
         conn.commit()
         conn.close()
 
-        return strength
+        return render_template(
+            'login.html',
+            success="Account created successfully! Password Strength: " + strength + ". Please login."
+        )
 
     return render_template('signup.html')
 
@@ -101,17 +127,10 @@ def login():
         conn.close()
 
         if user:
-
-            score = 80
-
-            return render_template(
-                'dashboard.html',
-                score=score,
-                suspicious_count=suspicious_count     
-            )
+            return redirect(url_for('dashboard'))
 
         else:
-            return "Invalid Email or Password"
+            return render_template('login.html', error="Invalid Email or Password")
 
     return render_template('login.html')
 @app.route('/dashboard')
@@ -139,6 +158,8 @@ def dashboard():
 
     # DYNAMIC SECURITY SCORE
 
+    weak_count = count_weak_passwords()
+
     if suspicious_count == 0:
         security_score = 100
 
@@ -151,13 +172,17 @@ def dashboard():
     else:
         security_score = 40
 
+    # Deduct points for weak passwords
+    security_score = max(0, security_score - (weak_count * 10))
+
     return render_template(
         'dashboard.html',
         suspicious_count=suspicious_count,
         threat1=threat1,
         threat2=threat2,
         threat3=threat3,
-        security_score=security_score
+        security_score=security_score,
+        weak_count=weak_count
     )
 # FILE SCANNER
 @app.route('/scanner', methods=['GET', 'POST'])
