@@ -3,46 +3,98 @@
 
 <head>
 
-    <title>Defense Console — CyberGuardian</title>
+    <title>Dashboard — CyberGuardian</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .dash-header {
+            margin: 20px auto 10px;
+        }
+        .dash-header h1 {
+            font-size: 38px;
+            margin: 10px 0 5px;
+        }
+        .dash-header .brand-tagline {
+            margin: 0 0 8px;
+        }
+        .dash-compact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        @media (max-width: 800px) {
+            .dash-compact-grid { grid-template-columns: 1fr; }
+        }
+        .dash-panel {
+            background: rgba(20, 25, 50, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: left;
+        }
+        .dash-panel h3 {
+            margin: 0 0 12px;
+            font-size: 16px;
+            text-align: left;
+        }
+        .dash-panel .alert-box {
+            margin: 8px 0;
+            padding: 12px 18px;
+            font-size: 15px;
+            width: 100%;
+        }
+        .compact-stats {
+            margin-top: 10px;
+        }
+        .compact-stats .stat-card {
+            padding: 20px 18px;
+        }
+        .compact-stats .stat-icon {
+            font-size: 32px;
+        }
+        .compact-stats .stat-value {
+            font-size: 34px;
+            margin: 5px 0;
+        }
+        .compact-stats .stat-label {
+            font-size: 12px;
+        }
+        .dash-action {
+            margin: 20px auto;
+        }
+    </style>
 
 </head>
 
 <body>
 
     <canvas id="matrix-canvas"></canvas>
-    <div class="global-scan"></div>
     <div class="live-clock" id="live-clock">00/00/0000 | 00:00:00</div>
 
     <div class="navbar">
-        <a href="/login">Login</a>
-        <a href="/signup">Signup</a>
         <a href="/dashboard">Dashboard</a>
         <a href="/scanner">Scanner</a>
+        <a href="/recommendations">Tips</a>
+        <a href="/url-check">URL Check</a>
+        <a href="/report">Download Report</a>
+        <a href="/logout">Logout</a>
     </div>
 
-    <div class="logo-section">
+    <div class="logo-section dash-header">
         <h1>CyberGuardian</h1>
         <p class="brand-tagline">// Threat Detection &amp; Security Dashboard //</p>
-
         <div class="system-status">
             <span class="status-dot"></span>
             System Online — Real-time Monitoring Active
         </div>
     </div>
 
-    <div class="boot-sequence">
-        <div class="boot-line"><span class="boot-time">[00:00:01]</span> <span class="boot-tag">[INIT]</span> Loading CyberGuardian Flask Application... <span class="boot-ok">[OK]</span></div>
-        <div class="boot-line"><span class="boot-time">[00:00:02]</span> <span class="boot-tag">[DB]</span> Connecting to SQLite database... <span class="boot-ok">[OK]</span></div>
-        <div class="boot-line"><span class="boot-time">[00:00:03]</span> <span class="boot-tag">[NET]</span> Fetching security alerts from thehackernews.com... <span class="boot-ok">[OK]</span></div>
-        <div class="boot-line"><span class="boot-time">[00:00:04]</span> <span class="boot-tag">[SCAN]</span> File scanner module initialized... <span class="boot-ok">[OK]</span></div>
-        <div class="boot-line"><span class="boot-time">[00:00:05]</span> <span class="boot-tag">[SYS]</span> All systems operational... <span class="boot-ok">[READY]</span></div>
-    </div>
-
-    <h2>Security Overview</h2>
-
-    <div class="dash-grid">
+    <div class="dash-grid compact-stats">
 
         <div class="stat-card">
             <div class="stat-icon">🛡️</div>
@@ -64,76 +116,59 @@
 
     </div>
 
-    <div class="section-divider"></div>
+    <div class="dash-compact-grid">
 
-    <h3>Threat Status Alerts</h3>
+        <div class="dash-panel">
+            <h3>Threat Status</h3>
 
-    {% if weak_count == 0 %}
-        <div class="alert-box moderate">
-            ✓ No Weak Passwords Detected — Identity Vault Secure
-        </div>
-    {% elif weak_count == 1 %}
-        <div class="alert-box warning">
-            ⚠ 1 Weak Password Detected — Review Required
-        </div>
-    {% else %}
-        <div class="alert-box danger">
-            ⛔ {{ weak_count }} Weak Passwords Detected — Critical Action Required
-        </div>
-    {% endif %}
+            {% if weak_count == 0 %}
+                <div class="alert-box moderate">✓ No Weak Passwords</div>
+            {% elif weak_count == 1 %}
+                <div class="alert-box warning">⚠ 1 Weak Password Detected</div>
+            {% else %}
+                <div class="alert-box danger">⛔ {{ weak_count }} Weak Passwords</div>
+            {% endif %}
 
-    {% if suspicious_count == 0 %}
-        <div class="alert-box moderate">
-            ✓ No Suspicious Files Found — Network Perimeter Clean
-        </div>
-    {% elif suspicious_count <= 2 %}
-        <div class="alert-box warning">
-            ⚠ {{ suspicious_count }} Suspicious Files Found — Quarantine Recommended
-        </div>
-    {% else %}
-        <div class="alert-box danger">
-            ⛔ {{ suspicious_count }} Suspicious Files Found — Immediate Response Required
-        </div>
-    {% endif %}
+            {% if suspicious_count == 0 %}
+                <div class="alert-box moderate">✓ No Suspicious Files</div>
+            {% elif suspicious_count <= 2 %}
+                <div class="alert-box warning">⚠ {{ suspicious_count }} Suspicious Files</div>
+            {% else %}
+                <div class="alert-box danger">⛔ {{ suspicious_count }} Suspicious Files</div>
+            {% endif %}
 
-    {% if security_score >= 80 %}
-        <div class="alert-box moderate">
-            ✓ Security Score: {{ security_score }}% — Excellent Defensive Posture
+            {% if security_score >= 80 %}
+                <div class="alert-box moderate">✓ Excellent Security Posture</div>
+            {% elif security_score >= 50 %}
+                <div class="alert-box warning">⚠ Moderate Risk Level</div>
+            {% else %}
+                <div class="alert-box danger">⛔ Critical Risk Level</div>
+            {% endif %}
         </div>
-    {% elif security_score >= 50 %}
-        <div class="alert-box warning">
-            ⚠ Security Score: {{ security_score }}% — Moderate Risk Exposure
+
+        <div class="dash-panel">
+            <h3>Latest Security Alerts</h3>
+
+            <div class="alert-box warning">
+                <strong>[01]</strong> &nbsp; {{ threat1 }}
+            </div>
+
+            <div class="alert-box danger">
+                <strong>[02]</strong> &nbsp; {{ threat2 }}
+            </div>
+
+            <div class="alert-box moderate">
+                <strong>[03]</strong> &nbsp; {{ threat3 }}
+            </div>
         </div>
-    {% else %}
-        <div class="alert-box danger">
-            ⛔ Security Score: {{ security_score }}% — Critical Risk Level
-        </div>
-    {% endif %}
 
-    <div class="section-divider"></div>
-
-    <h3>Threat Intelligence Feed</h3>
-    <p class="brand-tagline">// Live feed from global threat sources //</p>
-
-    <div class="alert-box warning">
-        <strong>[ALERT-01]</strong> &nbsp; {{ threat1 }}
     </div>
 
-    <div class="alert-box danger">
-        <strong>[ALERT-02]</strong> &nbsp; {{ threat2 }}
+    <div class="dash-action" style="text-align:center;">
+        <a href="/scanner">
+            <button>⚡ Launch File Scanner</button>
+        </a>
     </div>
-
-    <div class="alert-box moderate">
-        <strong>[ALERT-03]</strong> &nbsp; {{ threat3 }}
-    </div>
-
-    <div class="section-divider"></div>
-
-    <a href="/scanner">
-        <button>⚡ Launch File Scanner</button>
-    </a>
-
-    <br><br><br>
 
     <div class="status-bar">
         <div class="status-item">
