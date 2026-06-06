@@ -4,6 +4,7 @@ import re
 import os
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 suspicious_count = 0
 
@@ -158,7 +159,6 @@ def dashboard():
         threat3=threat3,
         security_score=security_score
     )
-
 # FILE SCANNER
 @app.route('/scanner', methods=['GET', 'POST'])
 def scanner():
@@ -173,12 +173,13 @@ def scanner():
     CREATE TABLE IF NOT EXISTS scan_history(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         filename TEXT,
-        result TEXT
+        result TEXT,
+        scan_time TEXT
     )
     ''')
 
     cur.execute(
-        "SELECT filename, result FROM scan_history ORDER BY id DESC"
+        "SELECT filename, result, scan_time FROM scan_history ORDER BY id DESC"
     )
 
     history = cur.fetchall()
@@ -188,13 +189,14 @@ def scanner():
     if request.method == 'POST':
 
         file = request.files['file']
+
         if file.filename == '':
 
             return render_template(
-        'scanner.html',
-        result='Please Select a File First',
-        history=history
-    )
+                'scanner.html',
+                result='Please Select a File First',
+                history=history
+            )
 
         filename = file.filename
 
@@ -212,13 +214,15 @@ def scanner():
 
                 result = "Warning: Suspicious File Detected"
 
+                current_time = datetime.now().strftime("%d-%m-%Y %I:%M %p")
+
                 conn = sqlite3.connect('database/users.db')
 
                 cur = conn.cursor()
 
                 cur.execute(
-                    "INSERT INTO scan_history(filename,result) VALUES(?,?)",
-                    (filename, result)
+                    "INSERT INTO scan_history(filename,result,scan_time) VALUES(?,?,?)",
+                    (filename, result, current_time)
                 )
 
                 conn.commit()
@@ -233,13 +237,15 @@ def scanner():
 
         result = "File Appears Safe"
 
+        current_time = datetime.now().strftime("%d-%m-%Y %I:%M %p")
+
         conn = sqlite3.connect('database/users.db')
 
         cur = conn.cursor()
 
         cur.execute(
-            "INSERT INTO scan_history(filename,result) VALUES(?,?)",
-            (filename, result)
+            "INSERT INTO scan_history(filename,result,scan_time) VALUES(?,?,?)",
+            (filename, result, current_time)
         )
 
         conn.commit()
@@ -256,5 +262,6 @@ def scanner():
         'scanner.html',
         history=history
     )
+
 if __name__ == '__main__':
     app.run(debug=True)
