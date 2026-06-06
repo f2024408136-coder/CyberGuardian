@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Recommendations — CyberGuardian</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .tips-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .tip-card {
+            background: rgba(20, 25, 50, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin: 14px 0;
+            text-align: left;
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+        }
+        .tip-card.high {
+            border-color: rgba(255, 71, 87, 0.5);
+            background: rgba(255, 71, 87, 0.05);
+        }
+        .tip-card.medium {
+            border-color: rgba(255, 170, 0, 0.5);
+            background: rgba(255, 170, 0, 0.05);
+        }
+        .tip-card.low {
+            border-color: rgba(0, 255, 136, 0.3);
+            background: rgba(0, 255, 136, 0.04);
+        }
+        .tip-icon {
+            font-size: 36px;
+            flex-shrink: 0;
+        }
+        .tip-content h4 {
+            margin: 0 0 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: #00d9ff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .tip-content p {
+            margin: 0;
+            color: #b8c2e0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .priority-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .priority-high { background: #ff4757; color: white; }
+        .priority-medium { background: #ffaa00; color: #050816; }
+        .priority-low { background: #00ff88; color: #050816; }
+    </style>
+
+</head>
+
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+    <div class="live-clock" id="live-clock">00/00/0000 | 00:00:00</div>
+
+    <div class="navbar">
+        <a href="/login">Login</a>
+        <a href="/signup">Signup</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/scanner">Scanner</a>
+        <a href="/recommendations">Recommendations</a>
+        <a href="/url-check">URL Check</a>
+    </div>
+
+    <div class="logo-section">
+        <h1>Security Recommendations</h1>
+        <p class="brand-tagline">// Personalized cybersecurity guidance //</p>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            Based on your current security score: {{ security_score }}%
+        </div>
+    </div>
+
+    <div class="tips-container">
+
+        {% for tip in tips %}
+        <div class="tip-card {{ tip.priority }}">
+            <div class="tip-icon">{{ tip.icon }}</div>
+            <div class="tip-content">
+                <span class="priority-badge priority-{{ tip.priority }}">{{ tip.priority }} priority</span>
+                <h4>{{ tip.title }}</h4>
+                <p>{{ tip.detail }}</p>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <div style="text-align:center; margin: 30px;">
+        <a href="/report"><button>📥 Download Full Report (PDF)</button></a>
+        <a href="/dashboard"><button>← Back to Dashboard</button></a>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="blink">●</span>
+            <span class="label">Status:</span>
+            <span class="value">ANALYZING</span>
+        </div>
+        <div class="status-item">
+            <span class="label">CPU:</span>
+            <span class="value" id="status-cpu">22.4%</span>
+        </div>
+        <div class="status-item">
+            <span class="label">Memory:</span>
+            <span class="value" id="status-mem">45.7%</span>
+        </div>
+        <div class="status-item">
+            <span class="label">Network:</span>
+            <span class="value" id="status-net">128 KB/s</span>
+        </div>
+        <div class="status-item">
+            <span class="label">User:</span>
+            <span class="value">ANALYST-01</span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='cyber.js') }}"></script>
+
+</body>
+
+</html>
