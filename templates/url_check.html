@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>URL Safety Checker — CyberGuardian</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .result-card {
+            max-width: 700px;
+            margin: 25px auto;
+            padding: 25px;
+            background: rgba(20, 25, 50, 0.5);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            text-align: left;
+        }
+        .verdict-banner {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .verdict-safe {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+        }
+        .verdict-suspicious {
+            background: rgba(255, 170, 0, 0.15);
+            color: #ffaa00;
+            border: 2px solid #ffaa00;
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.4);
+        }
+        .verdict-dangerous {
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff4757;
+            border: 2px solid #ff4757;
+            box-shadow: 0 0 25px rgba(255, 71, 87, 0.4);
+            animation: dangerPulse 2s infinite;
+        }
+        .url-display {
+            font-family: 'Share Tech Mono', monospace;
+            color: #00d9ff;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+        .score-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 40px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .issues-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        .issues-list li {
+            padding: 10px 14px;
+            margin: 6px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #00d9ff;
+            border-radius: 4px;
+            color: #b8c2e0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+        }
+        .issues-list li.issue {
+            border-left-color: #ff4757;
+        }
+        .issues-list li.ok {
+            border-left-color: #00ff88;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+    <div class="live-clock" id="live-clock">00/00/0000 | 00:00:00</div>
+
+    <div class="navbar">
+        <a href="/login">Login</a>
+        <a href="/signup">Signup</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/scanner">Scanner</a>
+        <a href="/recommendations">Recommendations</a>
+        <a href="/url-check">URL Check</a>
+    </div>
+
+    <div class="logo-section">
+        <h1>URL Safety Check</h1>
+        <p class="brand-tagline">// Detect phishing and suspicious links //</p>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            Phishing Detection Engine Active
+        </div>
+    </div>
+
+    <form method="POST" action="/url-check">
+        <label>Enter URL to Analyze</label>
+        <input type="text" name="url" placeholder="https://example.com" required>
+        <button type="submit">🔍 Analyze URL</button>
+    </form>
+
+    {% if result %}
+    <div class="result-card">
+
+        {% if result.verdict == 'Safe' %}
+            <div class="verdict-banner verdict-safe">✓ {{ result.verdict }}</div>
+        {% elif result.verdict == 'Suspicious' %}
+            <div class="verdict-banner verdict-suspicious">⚠ {{ result.verdict }}</div>
+        {% else %}
+            <div class="verdict-banner verdict-dangerous">⛔ {{ result.verdict }}</div>
+        {% endif %}
+
+        <p style="color:#8892b0; margin-top:0; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Analyzed URL:</p>
+        <div class="url-display">{{ result.url }}</div>
+
+        <p style="color:#8892b0; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Safety Score:</p>
+        <div class="score-display"
+            style="color: {% if result.score >= 80 %}#00ff88{% elif result.score >= 50 %}#ffaa00{% else %}#ff4757{% endif %};">
+            {{ result.score }}/100
+        </div>
+
+        <p style="color:#8892b0; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Analysis Details:</p>
+        <ul class="issues-list">
+            {% for issue in result.issues %}
+                {% if issue == 'No security issues detected' %}
+                    <li class="ok">✓ {{ issue }}</li>
+                {% else %}
+                    <li class="issue">⚠ {{ issue }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="blink">●</span>
+            <span class="label">Status:</span>
+            <span class="value">SCANNING</span>
+        </div>
+        <div class="status-item">
+            <span class="label">CPU:</span>
+            <span class="value" id="status-cpu">22.4%</span>
+        </div>
+        <div class="status-item">
+            <span class="label">Memory:</span>
+            <span class="value" id="status-mem">45.7%</span>
+        </div>
+        <div class="status-item">
+            <span class="label">Network:</span>
+            <span class="value" id="status-net">128 KB/s</span>
+        </div>
+        <div class="status-item">
+            <span class="label">User:</span>
+            <span class="value">ANALYST-01</span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='cyber.js') }}"></script>
+
+</body>
+
+</html>
