@@ -3,6 +3,47 @@
 
 <head>
     <title>Signup - CyberGuardian</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .strength-box {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .weak {
+            background-color: #e74c3c;
+        }
+
+        .medium {
+            background-color: #f39c12;
+        }
+
+        .strong {
+            background-color: #27ae60;
+        }
+
+        .strength-bar {
+            height: 8px;
+            width: 250px;
+            background-color: #ddd;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+    </style>
 </head>
 
 <body>
@@ -12,17 +53,63 @@
     <form method="POST">
 
         <label>Name:</label><br>
-        <input type="text" name="name"><br><br>
+        <input type="text" name="name" required><br><br>
 
         <label>Email:</label><br>
-        <input type="email" name="email"><br><br>
+        <input type="email" name="email" required><br><br>
 
         <label>Password:</label><br>
-        <input type="password" name="password"><br><br>
+        <input type="password" name="password" id="password" oninput="checkStrength()" required><br>
+
+        <div class="strength-bar">
+            <div class="strength-fill" id="strengthFill"></div>
+        </div>
+
+        <div id="strengthBox" class="strength-box" style="display:none;"></div>
+        <br><br>
 
         <button type="submit">Signup</button>
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     </form>
+
+    <script>
+        function checkStrength() {
+            var password = document.getElementById("password").value;
+            var box = document.getElementById("strengthBox");
+            var fill = document.getElementById("strengthFill");
+
+            var score = 0;
+
+            if (password.length >= 8) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[@#$%^&*!]/.test(password)) score++;
+
+            if (password.length === 0) {
+                box.style.display = "none";
+                fill.style.width = "0%";
+                return;
+            }
+
+            box.style.display = "inline-block";
+
+            if (score <= 1) {
+                box.className = "strength-box weak";
+                box.innerText = "Weak";
+                fill.style.width = "33%";
+                fill.style.backgroundColor = "#e74c3c";
+            } else if (score <= 3) {
+                box.className = "strength-box medium";
+                box.innerText = "Medium";
+                fill.style.width = "66%";
+                fill.style.backgroundColor = "#f39c12";
+            } else {
+                box.className = "strength-box strong";
+                box.innerText = "Strong";
+                fill.style.width = "100%";
+                fill.style.backgroundColor = "#27ae60";
+            }
+        }
+    </script>
 
 </body>
 </html>
