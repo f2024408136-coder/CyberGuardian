@@ -34,7 +34,7 @@
             width: 250px;
             background-color: #ddd;
             border-radius: 4px;
-            margin-top: 8px;
+            margin: 8px auto 0;
             overflow: hidden;
         }
 
@@ -42,6 +42,57 @@
             height: 100%;
             width: 0%;
             transition: width 0.3s, background-color 0.3s;
+        }
+
+        .crack-time {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background-color: #1a1a2e;
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            display: none;
+        }
+
+        .crack-time-label {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: inline-block;
+            width: auto;
+        }
+
+        .password-wrapper input {
+            padding-right: 35px;
+            box-sizing: border-box;
+        }
+
+        .eye-button {
+            position: absolute !important;
+            right: 6px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer !important;
+            font-size: 16px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            color: #555 !important;
+            width: 28px !important;
+            height: 24px !important;
+            line-height: 1 !important;
+            border-radius: 0 !important;
+        }
+
+        .eye-button:hover {
+            background: transparent !important;
+            color: #00d4ff !important;
         }
     </style>
 </head>
@@ -59,23 +110,46 @@
         <input type="email" name="email" required><br><br>
 
         <label>Password:</label><br>
-        <input type="password" name="password" id="password" oninput="checkStrength()" required><br>
+        <div class="password-wrapper">
+            <input type="password" name="password" id="password" oninput="checkStrength()" required>
+            <button type="button" class="eye-button" id="eyeButton" onclick="togglePassword()">👁</button>
+        </div>
+        <br>
 
         <div class="strength-bar">
             <div class="strength-fill" id="strengthFill"></div>
         </div>
 
         <div id="strengthBox" class="strength-box" style="display:none;"></div>
+
+        <div id="crackTime" class="crack-time">
+            <span class="crack-time-label">Estimated Crack Time:</span><br>
+            <span id="crackTimeValue"></span>
+        </div>
         <br><br>
 
         <button type="submit">Signup</button>
     </form>
 
     <script>
+        function togglePassword() {
+            var pwd = document.getElementById("password");
+            var btn = document.getElementById("eyeButton");
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                btn.innerText = "🙈";
+            } else {
+                pwd.type = "password";
+                btn.innerText = "👁";
+            }
+        }
+
         function checkStrength() {
             var password = document.getElementById("password").value;
             var box = document.getElementById("strengthBox");
             var fill = document.getElementById("strengthFill");
+            var crackBox = document.getElementById("crackTime");
+            var crackValue = document.getElementById("crackTimeValue");
 
             var score = 0;
 
@@ -87,10 +161,13 @@
             if (password.length === 0) {
                 box.style.display = "none";
                 fill.style.width = "0%";
+                crackBox.style.display = "none";
                 return;
             }
 
             box.style.display = "inline-block";
+            crackBox.style.display = "block";
+            crackValue.innerText = estimateCrackTime(password);
 
             if (score <= 1) {
                 box.className = "strength-box weak";
@@ -108,6 +185,37 @@
                 fill.style.width = "100%";
                 fill.style.backgroundColor = "#27ae60";
             }
+        }
+
+        function estimateCrackTime(password) {
+            var charset = 0;
+            if (/[a-z]/.test(password)) charset += 26;
+            if (/[A-Z]/.test(password)) charset += 26;
+            if (/[0-9]/.test(password)) charset += 10;
+            if (/[^a-zA-Z0-9]/.test(password)) charset += 32;
+
+            if (charset === 0) return "Instantly";
+
+            var combinations = Math.pow(charset, password.length);
+            var guessesPerSecond = 1000000000;
+            var seconds = combinations / guessesPerSecond;
+
+            return formatTime(seconds);
+        }
+
+        function formatTime(seconds) {
+            if (seconds < 1) return "Instantly";
+            if (seconds < 60) return Math.round(seconds) + " seconds";
+            if (seconds < 3600) return Math.round(seconds / 60) + " minutes";
+            if (seconds < 86400) return Math.round(seconds / 3600) + " hours";
+            if (seconds < 31536000) return Math.round(seconds / 86400) + " days";
+
+            var years = seconds / 31536000;
+            if (years < 1000) return Math.round(years) + " years";
+            if (years < 1000000) return Math.round(years / 1000) + " thousand years";
+            if (years < 1000000000) return Math.round(years / 1000000) + " million years";
+            if (years < 1000000000000) return Math.round(years / 1000000000) + " billion years";
+            return Math.round(years / 1000000000000) + " trillion years";
         }
     </script>
 
