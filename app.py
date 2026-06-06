@@ -42,6 +42,45 @@ def count_weak_passwords():
     except:
         return 0
 
+
+def get_password_distribution():
+    try:
+        conn = sqlite3.connect('database/users.db')
+        cur = conn.cursor()
+        cur.execute("SELECT password FROM users")
+        rows = cur.fetchall()
+        conn.close()
+        weak = medium = strong = 0
+        for row in rows:
+            score = get_password_score(row[0])
+            if score <= 1:
+                weak += 1
+            elif score <= 3:
+                medium += 1
+            else:
+                strong += 1
+        return {'weak': weak, 'medium': medium, 'strong': strong}
+    except:
+        return {'weak': 0, 'medium': 0, 'strong': 0}
+
+
+def get_scan_distribution():
+    try:
+        conn = sqlite3.connect('database/users.db')
+        cur = conn.cursor()
+        cur.execute("SELECT result FROM scan_history")
+        rows = cur.fetchall()
+        conn.close()
+        safe = suspicious = 0
+        for row in rows:
+            if 'Safe' in row[0]:
+                safe += 1
+            elif 'Suspicious' in row[0] or 'Warning' in row[0]:
+                suspicious += 1
+        return {'safe': safe, 'suspicious': suspicious}
+    except:
+        return {'safe': 0, 'suspicious': 0}
+
 suspicious_count = 0
 
 app = Flask(__name__)
@@ -337,6 +376,9 @@ def dashboard():
     # Deduct points for weak passwords
     security_score = max(0, security_score - (weak_count * 10))
 
+    pwd_dist = get_password_distribution()
+    scan_dist = get_scan_distribution()
+
     return render_template(
         'dashboard.html',
         suspicious_count=suspicious_count,
@@ -344,7 +386,12 @@ def dashboard():
         threat2=threat2,
         threat3=threat3,
         security_score=security_score,
-        weak_count=weak_count
+        weak_count=weak_count,
+        pwd_weak=pwd_dist['weak'],
+        pwd_medium=pwd_dist['medium'],
+        pwd_strong=pwd_dist['strong'],
+        scan_safe=scan_dist['safe'],
+        scan_suspicious=scan_dist['suspicious']
     )
 # FILE SCANNER
 @app.route('/scanner', methods=['GET', 'POST'])
