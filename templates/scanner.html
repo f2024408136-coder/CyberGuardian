@@ -12,14 +12,15 @@
 <body>
 
     <canvas id="matrix-canvas"></canvas>
-    <div class="global-scan"></div>
     <div class="live-clock" id="live-clock">00/00/0000 | 00:00:00</div>
 
     <div class="navbar">
-        <a href="/login">Login</a>
-        <a href="/signup">Signup</a>
         <a href="/dashboard">Dashboard</a>
         <a href="/scanner">Scanner</a>
+        <a href="/recommendations">Tips</a>
+        <a href="/url-check">URL Check</a>
+        <a href="/report">Download Report</a>
+        <a href="/logout">Logout</a>
     </div>
 
     <div class="logo-section">
@@ -32,11 +33,7 @@
         </div>
     </div>
 
-    <div class="radar-container">
-        <div class="radar-center"></div>
-    </div>
-
-    <form method="POST" enctype="multipart/form-data" action="/scanner">
+    <form method="POST" enctype="multipart/form-data" action="/scanner" id="scan-form">
 
         <label>Upload File for Analysis</label>
         <input type="file" name="file">
@@ -124,7 +121,55 @@
         </div>
     </div>
 
+    <!-- Scan Overlay — shown ONLY during file scan, hidden by default -->
+    <div class="scan-overlay" id="scan-overlay">
+        <div class="scan-line"></div>
+        <div class="radar-container">
+            <div class="radar-center"></div>
+        </div>
+        <div class="scan-overlay-text">Scanning File</div>
+        <div class="scan-overlay-info">Analyzing for suspicious extensions...</div>
+    </div>
+
     <script src="{{ url_for('static', filename='cyber.js') }}"></script>
+
+    <script>
+        document.getElementById('scan-form').addEventListener('submit', function(e) {
+            var fileInput = this.querySelector('input[type="file"]');
+            if (fileInput && fileInput.files.length > 0) {
+                if (!this.dataset.scanning) {
+                    e.preventDefault();
+                    this.dataset.scanning = 'true';
+
+                    var overlay = document.getElementById('scan-overlay');
+                    var infoText = overlay.querySelector('.scan-overlay-info');
+                    overlay.classList.add('active');
+
+                    var stages = [
+                        'Initializing scan engine...',
+                        'Reading file signature...',
+                        'Checking suspicious extensions...',
+                        'Analyzing threat patterns...',
+                        'Finalizing results...'
+                    ];
+                    var stageIndex = 0;
+                    infoText.innerText = stages[0];
+                    var stageTimer = setInterval(function() {
+                        stageIndex++;
+                        if (stageIndex < stages.length) {
+                            infoText.innerText = stages[stageIndex];
+                        }
+                    }, 500);
+
+                    var form = this;
+                    setTimeout(function() {
+                        clearInterval(stageTimer);
+                        form.submit();
+                    }, 2800);
+                }
+            }
+        });
+    </script>
 
 </body>
 
