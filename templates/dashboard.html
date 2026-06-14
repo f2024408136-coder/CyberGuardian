@@ -6,6 +6,7 @@
     <title>Dashboard — CyberGuardian</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         .dash-header {
@@ -67,6 +68,60 @@
         .dash-action {
             margin: 20px auto;
         }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            max-width: 850px;
+            margin: 18px auto;
+            padding: 0 20px;
+        }
+        @media (max-width: 800px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+        .chart-card {
+            background: rgba(20, 25, 50, 0.5);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 217, 255, 0.5);
+            border-radius: 12px;
+            padding: 14px 16px;
+            text-align: center;
+            box-shadow:
+                0 0 20px rgba(0, 217, 255, 0.25),
+                inset 0 0 15px rgba(0, 217, 255, 0.05);
+            animation: chartGlow 3s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+        .chart-card:hover {
+            border-color: rgba(0, 255, 136, 0.7);
+            box-shadow:
+                0 0 35px rgba(0, 255, 136, 0.45),
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+            transform: translateY(-3px);
+        }
+        @keyframes chartGlow {
+            0%, 100% {
+                box-shadow:
+                    0 0 20px rgba(0, 217, 255, 0.25),
+                    inset 0 0 15px rgba(0, 217, 255, 0.05);
+            }
+            50% {
+                box-shadow:
+                    0 0 30px rgba(0, 217, 255, 0.5),
+                    inset 0 0 20px rgba(0, 217, 255, 0.1);
+            }
+        }
+        .chart-card h3 {
+            margin: 0 0 8px;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+        .chart-canvas-wrapper {
+            position: relative;
+            height: 180px;
+            filter: drop-shadow(0 0 8px rgba(0, 217, 255, 0.4));
+        }
     </style>
 
 </head>
@@ -77,11 +132,15 @@
     <div class="live-clock" id="live-clock">00/00/0000 | 00:00:00</div>
 
     <div class="navbar">
+        <a href="/login">Login</a>
+        <a href="/signup">Signup</a>
         <a href="/dashboard">Dashboard</a>
         <a href="/scanner">Scanner</a>
+        <a href="/statistics">Stats</a>
         <a href="/recommendations">Tips</a>
         <a href="/url-check">URL Check</a>
-        <a href="/report">Download Report</a>
+        <a href="/breach-check">Breach</a>
+        <a href="/report">Report</a>
         <a href="/logout">Logout</a>
     </div>
 
@@ -114,6 +173,21 @@
             <div class="stat-label">Suspicious Files</div>
         </div>
 
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>Password Strength Distribution</h3>
+            <div class="chart-canvas-wrapper">
+                <canvas id="passwordChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3>File Scan Results</h3>
+            <div class="chart-canvas-wrapper">
+                <canvas id="scanChart"></canvas>
+            </div>
+        </div>
     </div>
 
     <div class="dash-compact-grid">
@@ -195,6 +269,105 @@
     </div>
 
     <script src="{{ url_for('static', filename='cyber.js') }}"></script>
+
+    <script>
+        Chart.defaults.color = '#b8c2e0';
+        Chart.defaults.font.family = "'Rajdhani', sans-serif";
+        Chart.defaults.font.size = 13;
+
+        const pwdData = {
+            weak: {{ pwd_weak }},
+            medium: {{ pwd_medium }},
+            strong: {{ pwd_strong }}
+        };
+        const scanData = {
+            safe: {{ scan_safe }},
+            suspicious: {{ scan_suspicious }}
+        };
+
+        const pwdTotal = pwdData.weak + pwdData.medium + pwdData.strong;
+        const scanTotal = scanData.safe + scanData.suspicious;
+
+        new Chart(document.getElementById('passwordChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Weak', 'Medium', 'Strong'],
+                datasets: [{
+                    data: pwdTotal > 0
+                        ? [pwdData.weak, pwdData.medium, pwdData.strong]
+                        : [1, 0, 0],
+                    backgroundColor: ['#ff4757', '#ffaa00', '#00ff88'],
+                    borderColor: '#0a0e27',
+                    borderWidth: 2,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 12, font: { size: 13 } }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(5, 8, 22, 0.95)',
+                        titleColor: '#00d9ff',
+                        bodyColor: '#e8e9f3',
+                        borderColor: '#00d9ff',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(ctx) {
+                                if (pwdTotal === 0) return 'No data yet';
+                                const pct = ((ctx.parsed / pwdTotal) * 100).toFixed(1);
+                                return ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('scanChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Safe', 'Suspicious'],
+                datasets: [{
+                    data: scanTotal > 0
+                        ? [scanData.safe, scanData.suspicious]
+                        : [1, 0],
+                    backgroundColor: ['#00ff88', '#ff4757'],
+                    borderColor: '#0a0e27',
+                    borderWidth: 2,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { padding: 12, font: { size: 13 } }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(5, 8, 22, 0.95)',
+                        titleColor: '#00d9ff',
+                        bodyColor: '#e8e9f3',
+                        borderColor: '#00d9ff',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(ctx) {
+                                if (scanTotal === 0) return 'No scans yet';
+                                const pct = ((ctx.parsed / scanTotal) * 100).toFixed(1);
+                                return ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 
 </body>
 
