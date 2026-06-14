@@ -8,14 +8,86 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
     <style>
+        .rec-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            max-width: 850px;
+            margin: 18px auto;
+            padding: 0 20px;
+        }
+        .rec-summary-card {
+            background: rgba(20, 25, 50, 0.5);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 217, 255, 0.4);
+            border-radius: 12px;
+            padding: 16px 18px;
+            text-align: center;
+            box-shadow: 0 0 18px rgba(0, 217, 255, 0.18);
+            transition: all 0.3s ease;
+        }
+        .rec-summary-card:hover {
+            border-color: rgba(0, 255, 136, 0.6);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.35);
+            transform: translateY(-3px);
+        }
+        .rec-summary-card .label {
+            font-family: 'Share Tech Mono', monospace;
+            color: #8892b0;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .rec-summary-card .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 4px;
+        }
+
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px auto 10px;
+        }
+        .filter-btn {
+            background: rgba(20, 25, 50, 0.5) !important;
+            border: 1px solid rgba(0, 217, 255, 0.4) !important;
+            color: #00d9ff !important;
+            padding: 8px 18px !important;
+            font-family: 'Orbitron', sans-serif !important;
+            font-size: 12px !important;
+            letter-spacing: 2px !important;
+            text-transform: uppercase !important;
+            margin: 0 !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            box-shadow: none !important;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: linear-gradient(135deg, #00d9ff, #00ff88) !important;
+            color: #050816 !important;
+            border-color: transparent !important;
+            box-shadow: 0 0 18px rgba(0, 217, 255, 0.5) !important;
+            transform: translateY(-1px) !important;
+        }
+
         .tips-container {
             max-width: 900px;
             margin: 20px auto;
             padding: 0 20px;
         }
         .tip-card {
-            background: rgba(20, 25, 50, 0.4);
+            background: rgba(20, 25, 50, 0.45);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(0, 217, 255, 0.3);
             border-radius: 12px;
             padding: 18px 22px;
@@ -24,27 +96,81 @@
             display: flex;
             gap: 18px;
             align-items: flex-start;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .tip-card::before,
+        .tip-card::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        .tip-card::before {
+            top: 8px;
+            left: 8px;
+            border-right: none;
+            border-bottom: none;
+        }
+        .tip-card::after {
+            bottom: 8px;
+            right: 8px;
+            border-left: none;
+            border-top: none;
+        }
+        .tip-card:hover {
+            transform: translateX(4px);
+        }
+        .tip-card:hover::before,
+        .tip-card:hover::after {
+            width: 24px;
+            height: 24px;
+            opacity: 1;
         }
         .tip-card.high {
             border-color: rgba(255, 71, 87, 0.5);
-            background: rgba(255, 71, 87, 0.05);
+            background: rgba(255, 71, 87, 0.06);
+            color: #ff4757;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.15);
+        }
+        .tip-card.high:hover {
+            box-shadow: 0 0 30px rgba(255, 71, 87, 0.35);
         }
         .tip-card.medium {
             border-color: rgba(255, 170, 0, 0.5);
-            background: rgba(255, 170, 0, 0.05);
+            background: rgba(255, 170, 0, 0.06);
+            color: #ffaa00;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.15);
+        }
+        .tip-card.medium:hover {
+            box-shadow: 0 0 30px rgba(255, 170, 0, 0.35);
         }
         .tip-card.low {
-            border-color: rgba(0, 255, 136, 0.3);
+            border-color: rgba(0, 255, 136, 0.4);
             background: rgba(0, 255, 136, 0.04);
+            color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.12);
         }
+        .tip-card.low:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
         .tip-icon {
-            font-size: 36px;
+            font-size: 38px;
             flex-shrink: 0;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+        .tip-content {
+            flex: 1;
         }
         .tip-content h4 {
-            margin: 0 0 6px;
+            margin: 0 0 8px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             color: #00d9ff;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -53,22 +179,43 @@
             margin: 0;
             color: #b8c2e0;
             font-size: 15px;
-            line-height: 1.6;
+            line-height: 1.7;
         }
+
         .priority-badge {
             display: inline-block;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 700;
             font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
             text-transform: uppercase;
         }
-        .priority-high { background: #ff4757; color: white; }
-        .priority-medium { background: #ffaa00; color: #050816; }
-        .priority-low { background: #00ff88; color: #050816; }
+        .priority-high {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            box-shadow: 0 0 12px rgba(255, 71, 87, 0.5);
+        }
+        .priority-medium {
+            background: linear-gradient(135deg, #ffaa00, #ffd166);
+            color: #050816;
+            box-shadow: 0 0 12px rgba(255, 170, 0, 0.5);
+        }
+        .priority-low {
+            background: linear-gradient(135deg, #00ff88, #00d9ff);
+            color: #050816;
+            box-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
+        }
+
+        .action-row {
+            text-align: center;
+            margin: 30px auto;
+        }
+        .action-row button {
+            margin: 5px 8px;
+        }
     </style>
 
 </head>
@@ -83,24 +230,53 @@
         <a href="/signup">Signup</a>
         <a href="/dashboard">Dashboard</a>
         <a href="/scanner">Scanner</a>
-        <a href="/recommendations">Recommendations</a>
+        <a href="/statistics">Stats</a>
+        <a href="/recommendations">Tips</a>
         <a href="/url-check">URL Check</a>
+        <a href="/breach-check">Breach</a>
+        <a href="/report">Report</a>
+        <a href="/logout">Logout</a>
     </div>
 
     <div class="logo-section">
         <h1>Security Recommendations</h1>
         <p class="brand-tagline">// Personalized cybersecurity guidance //</p>
-
         <div class="system-status">
             <span class="status-dot"></span>
-            Based on your current security score: {{ security_score }}%
+            Advisory Engine Active
         </div>
     </div>
 
-    <div class="tips-container">
+    <div class="rec-summary">
+        <div class="rec-summary-card">
+            <div class="label">Security Score</div>
+            <div class="value">{{ security_score }}%</div>
+        </div>
+        <div class="rec-summary-card">
+            <div class="label">Weak Passwords</div>
+            <div class="value">{{ weak_count }}</div>
+        </div>
+        <div class="rec-summary-card">
+            <div class="label">Suspicious Files</div>
+            <div class="value">{{ suspicious_count }}</div>
+        </div>
+        <div class="rec-summary-card">
+            <div class="label">Total Tips</div>
+            <div class="value">{{ tips|length }}</div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all" type="button">All Tips</button>
+        <button class="filter-btn" data-filter="high" type="button">High Priority</button>
+        <button class="filter-btn" data-filter="medium" type="button">Medium</button>
+        <button class="filter-btn" data-filter="low" type="button">Low</button>
+    </div>
+
+    <div class="tips-container" id="tipsContainer">
 
         {% for tip in tips %}
-        <div class="tip-card {{ tip.priority }}">
+        <div class="tip-card {{ tip.priority }}" data-priority="{{ tip.priority }}">
             <div class="tip-icon">{{ tip.icon }}</div>
             <div class="tip-content">
                 <span class="priority-badge priority-{{ tip.priority }}">{{ tip.priority }} priority</span>
@@ -112,8 +288,8 @@
 
     </div>
 
-    <div style="text-align:center; margin: 30px;">
-        <a href="/report"><button>📥 Download Full Report (PDF)</button></a>
+    <div class="action-row">
+        <a href="/report"><button>📥 Download Full Report</button></a>
         <a href="/dashboard"><button>← Back to Dashboard</button></a>
     </div>
 
@@ -142,6 +318,23 @@
     </div>
 
     <script src="{{ url_for('static', filename='cyber.js') }}"></script>
+
+    <script>
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                var filter = this.dataset.filter;
+                document.querySelectorAll('.tip-card').forEach(function(card) {
+                    if (filter === 'all' || card.dataset.priority === filter) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 
