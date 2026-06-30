@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Uploaded files (test data, not project source)
+scans/*
+!scans/.gitkeep
+
+# Local database backups
+database/*.db-journal
+database/*.db.bak
+
+# Temporary files
+*.tmp
+*.bak
+~$*
