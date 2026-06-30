@@ -242,7 +242,7 @@ def check_url_safety(url):
 # HOME
 @app.route('/')
 def home():
-    return "CyberGuardian Running Successfully"
+    return redirect(url_for('login'))
 
 
 # SIGNUP
